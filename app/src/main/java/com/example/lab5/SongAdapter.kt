@@ -53,10 +53,12 @@ class SongAdapter(
         return position.toLong()
     }
 
+
     fun updateSongs(newSongs: List<Song>) {
-        displayedSongs = newSongs
+        songs = newSongs
         notifyDataSetChanged()
     }
+
 
     fun getCount(): Int {
         return displayedSongs.size
@@ -65,4 +67,5 @@ class SongAdapter(
     fun getItem(position: Int): Song? {
         return displayedSongs[position]
     }
+
 }

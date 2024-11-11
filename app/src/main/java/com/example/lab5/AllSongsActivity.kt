@@ -1,18 +1,20 @@
-//package com.example.lr4_omr
-//
-//import android.app.AlertDialog
-//import android.os.Bundle
-//import android.view.ContextMenu
-//import android.view.Menu
-//import android.view.MenuItem
-//import android.view.View
-//import android.widget.CheckBox
-//import android.widget.EditText
-//import android.widget.Toast
-//import androidx.appcompat.app.AppCompatActivity
-//import androidx.recyclerview.widget.ItemTouchHelper
-//import androidx.recyclerview.widget.LinearLayoutManager
-//import com.example.lr4_omr.databinding.ActivityAllSongsBinding
+package com.example.lab5
+
+import android.app.AlertDialog
+import android.content.Intent
+import android.os.Bundle
+import android.view.ContextMenu
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.widget.CheckBox
+import android.widget.EditText
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.lab5.databinding.ActivityAllSongsBinding
+import java.io.Serializable
 //
 //class AllSongsActivity : AppCompatActivity() {
 //    private lateinit var binding: ActivityAllSongsBinding
@@ -22,6 +24,7 @@
 //    private lateinit var artists: MutableList<Artist>
 //    private lateinit var favorites: MutableList<Song>
 //    private lateinit var allSongsNew: MutableList<Song>
+//    private val ALL_SONGS_REQUEST_CODE = 100
 //
 //    override fun onCreate(savedInstanceState: Bundle?) {
 //        super.onCreate(savedInstanceState)
@@ -35,8 +38,9 @@
 //        albums = allSongsBundle?.getSerializable("albums") as? MutableList<Album> ?: mutableListOf()
 //        artists = allSongsBundle?.getSerializable("artists") as? MutableList<Artist> ?: mutableListOf()
 //        favorites = allSongsBundle?.getSerializable("favorites") as? MutableList<Song> ?: mutableListOf()
+//        allSongsNew = allSongs.toMutableList() // Создаем копию списка allSongs
 //
-//        songAdapter = SongAdapter(allSongs) { song ->
+//        songAdapter = SongAdapter(allSongsNew) { song ->
 //            val position = songAdapter.songs.indexOf(song)
 //            binding.recyclerViewAllSongs.showContextMenuForChild(binding.recyclerViewAllSongs.findViewHolderForAdapterPosition(position)?.itemView!!)
 //        }
@@ -68,6 +72,7 @@
 //        when (item.itemId) {
 //            1 -> {
 //                songAdapter.removeAt(position)
+//                allSongsNew.removeAt(position)
 //                return true
 //            }
 //            2 -> {
@@ -83,7 +88,16 @@
 //    override fun onOptionsItemSelected(item: MenuItem): Boolean {
 //        when (item.itemId) {
 //            android.R.id.home -> {
-//                updateSongs(allSongs, allSongsNew)
+//                val bundle = Bundle()
+//                bundle.putSerializable("allSongs", allSongs as Serializable?) // Передаем allSongs
+//                bundle.putSerializable("albums", albums as Serializable?)
+//                bundle.putSerializable("artists", artists as Serializable?)
+//                bundle.putSerializable("favorites", favorites as Serializable?)
+//
+//                // Создаем Intent для возврата в MainActivity
+//                val intent = Intent()
+//                intent.putExtras(bundle) // Добавляем Bundle в Intent
+//                setResult(RESULT_OK, intent) // Устанавливаем результат и Intent
 //                finish()
 //                return true
 //            }
@@ -91,51 +105,58 @@
 //        }
 //    }
 //
-//    private fun showAddSongDialog() {
+//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//        super.onActivityResult(requestCode, resultCode, data)
+//        if (requestCode == ALL_SONGS_REQUEST_CODE && resultCode == RESULT_OK) {
+//            val bundle = data?.extras
+//            allSongs = bundle?.getSerializable("allSongs") as? MutableList<Song> ?: mutableListOf()
+//            albums = bundle?.getSerializable("albums") as? MutableList<Album> ?: mutableListOf()
+//            artists = bundle?.getSerializable("artists") as? MutableList<Artist> ?: mutableListOf()
+//            favorites = bundle?.getSerializable("favorites") as? MutableList<Song> ?: mutableListOf()
+//
+//            allSongsNew = allSongs.toMutableList()
+//            songAdapter.updateSongs(allSongsNew)
+//        }
+//    }
+//
+//
+//
+//
+//
+//
+//    fun showAddSongDialog() {
 //        val builder = AlertDialog.Builder(this)
 //        val inflater = layoutInflater
 //        val dialogView = inflater.inflate(R.layout.dialog_add_song, null)
-//        val editTextTitle = dialogView.findViewById<EditText>(R.id.editTextTitle)
-//        val editTextArtist = dialogView.findViewById<EditText>(R.id.editTextArtist)
-//        val editTextAlbum = dialogView.findViewById<EditText>(R.id.editTextAlbum)
-//        val checkBoxFavorite = dialogView.findViewById<CheckBox>(R.id.checkBoxFavorite)
+//        val titleInput = dialogView.findViewById<EditText>(R.id.editTextTitle)
+//        val artistInput = dialogView.findViewById<EditText>(R.id.editTextArtist)
+//        val albumInput = dialogView.findViewById<EditText>(R.id.editTextAlbum)
+//        val favoriteCheckbox = dialogView.findViewById<CheckBox>(R.id.checkBoxFavorite)
 //
 //        builder.setView(dialogView)
-//            .setPositiveButton("Добавить") { _, _ ->
-//                val title = editTextTitle.text.toString()
-//                val artist = editTextArtist.text.toString()
-//                val album = editTextAlbum.text.toString()
-//                val isFavorite = checkBoxFavorite.isChecked
+//            .setPositiveButton("Добавить") { dialog, _ ->
+//                val title = titleInput.text.toString()
+//                val artist = artistInput.text.toString()
+//                val album = albumInput.text.toString()
+//                val isFavorite = favoriteCheckbox.isChecked
 //
-//                if (title.isEmpty() || artist.isEmpty() || album.isEmpty()) {
-//                    Toast.makeText(this, "Заполните все поля", Toast.LENGTH_SHORT).show()
+//                if (title.isBlank() || artist.isBlank() || album.isBlank()) {
+//                    Toast.makeText(this, "Пожалуйста, заполните все поля", Toast.LENGTH_SHORT).show()
 //                    return@setPositiveButton
 //                }
 //
-//
-//                if (!albums.any { it.title == album && it.artist == artist }) {
-//                    val newAlbum = Album(album, artist)
-//                    albums.add(newAlbum)
-//                }
-//
-//                if (!artists.any { it.name == artist }) {
-//                    val newArtist = Artist(artist)
-//                    artists.add(newArtist)
-//                }
-//
 //                val newSong = Song(title, artist, album, isFavorite)
-//                allSongs.add(newSong)
-//                if (isFavorite) {
-//                    favorites.add(newSong)
-//                }
-//                songAdapter.notifyDataSetChanged()
+//                allSongsNew.add(newSong)
+//                songAdapter.notifyItemInserted(allSongsNew.size - 1)
+//                dialog.dismiss()
 //            }
 //            .setNegativeButton("Отмена") { dialog, _ ->
 //                dialog.dismiss()
 //            }
 //            .show()
 //    }
-//    public fun showEditSongDialog(song: Song) {
+//
+//    fun showEditSongDialog(song: Song) {
 //        val builder = AlertDialog.Builder(this)
 //        val inflater = layoutInflater
 //        val dialogView = inflater.inflate(R.layout.dialog_add_song, null)
@@ -174,32 +195,12 @@
 //    }
 //
 //
-//    public fun updateSongs(songOld: Song, songNew: Song) {
-//
+//    private fun updateSongs(originalSongs: MutableList<Song>, newSongs: MutableList<Song>) {
+//        originalSongs.clear()
+//        originalSongs.addAll(newSongs)
 //    }
-//
-//
-//
 //}
 
-
-package com.example.lab5
-
-import android.app.AlertDialog
-import android.content.Intent
-import android.os.Bundle
-import android.view.ContextMenu
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.widget.CheckBox
-import android.widget.EditText
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.lab5.databinding.ActivityAllSongsBinding
-import java.io.Serializable
 
 class AllSongsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAllSongsBinding
@@ -208,7 +209,6 @@ class AllSongsActivity : AppCompatActivity() {
     private lateinit var albums: MutableList<Album>
     private lateinit var artists: MutableList<Artist>
     private lateinit var favorites: MutableList<Song>
-    private lateinit var allSongsNew: MutableList<Song>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -222,9 +222,8 @@ class AllSongsActivity : AppCompatActivity() {
         albums = allSongsBundle?.getSerializable("albums") as? MutableList<Album> ?: mutableListOf()
         artists = allSongsBundle?.getSerializable("artists") as? MutableList<Artist> ?: mutableListOf()
         favorites = allSongsBundle?.getSerializable("favorites") as? MutableList<Song> ?: mutableListOf()
-        allSongsNew = allSongs.toMutableList() // Создаем копию списка allSongs
 
-        songAdapter = SongAdapter(allSongsNew) { song ->
+        songAdapter = SongAdapter(allSongs) { song ->
             val position = songAdapter.songs.indexOf(song)
             binding.recyclerViewAllSongs.showContextMenuForChild(binding.recyclerViewAllSongs.findViewHolderForAdapterPosition(position)?.itemView!!)
         }
@@ -247,6 +246,7 @@ class AllSongsActivity : AppCompatActivity() {
 
         menu?.add(Menu.NONE, 1, Menu.NONE, "Удалить")
         menu?.add(Menu.NONE, 2, Menu.NONE, "Добавить")
+
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
@@ -256,7 +256,6 @@ class AllSongsActivity : AppCompatActivity() {
         when (item.itemId) {
             1 -> {
                 songAdapter.removeAt(position)
-                allSongsNew.removeAt(position) // Удаляем из копии списка
                 return true
             }
             2 -> {
@@ -272,12 +271,6 @@ class AllSongsActivity : AppCompatActivity() {
 //    override fun onOptionsItemSelected(item: MenuItem): Boolean {
 //        when (item.itemId) {
 //            android.R.id.home -> {
-////                updateSongs(allSongs, allSongsNew)
-//                val intent = Intent(this, MainActivity::class.java)
-//                val mainBundle = Bundle()
-//                mainBundle.putSerializable("allSongs", allSongsNew as Serializable?)
-//                intent.putExtra("mainBundle", mainBundle)
-//                startActivity(intent)
 //                finish()
 //                return true
 //            }
@@ -288,18 +281,16 @@ class AllSongsActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> {
-                // Обновляем оригинал `allSongs` перед возвратом
-                updateSongs(allSongs, allSongsNew)
-
-                // Создаем Bundle для передачи данных
                 val bundle = Bundle()
-                bundle.putSerializable("allSongs", allSongs as Serializable?) // Передаем `allSongs`
-                bundle.putSerializable("albums", albums as Serializable?) // Передаем `albums`
-                bundle.putSerializable("artists", artists as Serializable?) // Передаем `artists`
-                bundle.putSerializable("favorites", favorites as Serializable?) // Передаем `favorites`
+                bundle.putSerializable("allSongs", allSongs as Serializable?) // Передаем allSongs
+                bundle.putSerializable("albums", albums as Serializable?)
+                bundle.putSerializable("artists", artists as Serializable?)
+                bundle.putSerializable("favorites", favorites as Serializable?)
 
-                // Возвращаемся в `MainActivity` с данными
-                setResult(RESULT_OK, Intent().putExtras(bundle))
+                // Создаем Intent для возврата в MainActivity
+                val intent = Intent()
+                intent.putExtras(bundle) // Добавляем Bundle в Intent
+                setResult(RESULT_OK, intent) // Устанавливаем результат и Intent
                 finish()
                 return true
             }
@@ -307,40 +298,39 @@ class AllSongsActivity : AppCompatActivity() {
         }
     }
 
-
-
-    public fun showAddSongDialog() {
+    private fun showAddSongDialog() {
         val builder = AlertDialog.Builder(this)
         val inflater = layoutInflater
         val dialogView = inflater.inflate(R.layout.dialog_add_song, null)
-        val titleInput = dialogView.findViewById<EditText>(R.id.editTextTitle)
-        val artistInput = dialogView.findViewById<EditText>(R.id.editTextArtist)
-        val albumInput = dialogView.findViewById<EditText>(R.id.editTextAlbum)
-        val favoriteCheckbox = dialogView.findViewById<CheckBox>(R.id.checkBoxFavorite)
+        val editTextTitle = dialogView.findViewById<EditText>(R.id.editTextTitle)
+        val editTextArtist = dialogView.findViewById<EditText>(R.id.editTextArtist)
+        val editTextAlbum = dialogView.findViewById<EditText>(R.id.editTextAlbum)
+        val checkBoxFavorite = dialogView.findViewById<CheckBox>(R.id.checkBoxFavorite)
 
         builder.setView(dialogView)
-            .setPositiveButton("Добавить") { dialog, _ ->
-                val title = titleInput.text.toString()
-                val artist = artistInput.text.toString()
-                val album = albumInput.text.toString()
-                val isFavorite = favoriteCheckbox.isChecked
+            .setPositiveButton("Добавить") { _, _ ->
+                val title = editTextTitle.text.toString()
+                val artist = editTextArtist.text.toString()
+                val album = editTextAlbum.text.toString()
+                val isFavorite = checkBoxFavorite.isChecked
 
-                if (title.isBlank() || artist.isBlank() || album.isBlank()) {
-                    Toast.makeText(this, "Пожалуйста, заполните все поля", Toast.LENGTH_SHORT).show()
+                if (title.isEmpty() || artist.isEmpty() || album.isEmpty()) {
+                    Toast.makeText(this, "Заполните все поля", Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
 
                 val newSong = Song(title, artist, album, isFavorite)
-                allSongsNew.add(newSong)
-                songAdapter.notifyItemInserted(allSongsNew.size - 1)
-                dialog.dismiss()
+                allSongs.add(newSong)
+                if (isFavorite) {
+                    favorites.add(newSong)
+                }
+                songAdapter.notifyDataSetChanged()
             }
             .setNegativeButton("Отмена") { dialog, _ ->
                 dialog.dismiss()
             }
             .show()
     }
-
     public fun showEditSongDialog(song: Song) {
         val builder = AlertDialog.Builder(this)
         val inflater = layoutInflater
@@ -377,12 +367,5 @@ class AllSongsActivity : AppCompatActivity() {
                 dialog.dismiss()
             }
             .show()
-    }
-
-
-    // Метод для обновления списка песен
-    private fun updateSongs(originalSongs: MutableList<Song>, newSongs: MutableList<Song>) {
-        originalSongs.clear()
-        originalSongs.addAll(newSongs)
     }
 }
