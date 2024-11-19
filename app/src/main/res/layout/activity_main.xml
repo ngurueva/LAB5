@@ -109,6 +109,7 @@
             android:text="Добавить"
             android:textAllCaps="true"
             android:textColor="#FFFFFF"
+            android:textColorLink="#000000"
             android:textSize="18sp" />
 
     </RelativeLayout>
@@ -122,14 +123,13 @@
         android:orientation="horizontal"/>
 
 
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewMain"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/buttonContainer"
         android:layout_marginTop="16dp"
-        android:background="#B8F6E8C5" />
+        android:background="#29FF9800" />
 
 
 

@@ -1,13 +1,10 @@
 package com.example.lab5
 
-import android.content.Intent
 import android.os.Bundle
-import android.view.Menu
 import android.view.MenuItem
-import androidx.appcompat.app.AppCompatActivity
 import android.widget.ArrayAdapter
+import androidx.appcompat.app.AppCompatActivity
 import com.example.lab5.databinding.ActivityAlbumBinding
-import java.io.Serializable
 
 class AlbumActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAlbumBinding

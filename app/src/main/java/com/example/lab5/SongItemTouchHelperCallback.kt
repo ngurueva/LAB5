@@ -4,7 +4,6 @@ import android.view.View
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 
-
 class SongItemTouchHelperCallback(
     private val adapter: SongAdapter,
     private val activity: AllSongsActivity

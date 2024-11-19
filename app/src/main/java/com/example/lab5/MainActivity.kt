@@ -359,11 +359,10 @@ class MainActivity : AppCompatActivity() {
             artists = bundle?.getSerializable("artists") as? MutableList<Artist> ?: mutableListOf()
             favorites = bundle?.getSerializable("favorites") as? MutableList<Song> ?: mutableListOf()
 
-            songAdapter.updateSongs(allSongs) // Обновление адаптера MainActivity
+            songAdapter.updateSongs(allSongs)
         }
     }
 
-    // Новый SongAdapter для MainActivity
     inner class MainSongAdapter(songs: List<Song>) :
         RecyclerView.Adapter<MainSongAdapter.SongViewHolder>() {
         private var displayedSongs = songs
@@ -399,6 +398,12 @@ class MainActivity : AppCompatActivity() {
         fun updateSongs(newSongs: List<Song>) {
             displayedSongs = newSongs
             notifyDataSetChanged()
+
+        }
+
+        fun removeAt(position: Int) {
+            displayedSongs = displayedSongs.toMutableList().also { it.removeAt(position) }
+            notifyItemRemoved(position)
         }
     }
 }
